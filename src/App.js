@@ -1,28 +1,28 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from "yup";
 
-import { Box, Button, Container, IconButton, ToggleButton, Typography } from "@mui/material";
+import { Box, Button, Container, ToggleButton, Tooltip, Typography } from "@mui/material";
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
 
-import { getValue } from "@testing-library/user-event/dist/utils";
 import { theme } from './constants/theme'
 import InputRHF from "./components/RHF/InputRHF";
 import { ThemeProvider } from '@mui/material/styles'
-//import { getIndicators } from "./services/indicators";
-//import { getSimulator } from "./services/simulations";
+import { getIndicators } from "./services/indicators";
+import { getSimulator } from "./services/simulations";
+import InputMask from "react-input-mask/lib/react-input-mask.development";
 
-const mode = 'onSubmit';
+const mode = 'all';
 
 const defaultValues = {
-  initialContribution: "",
-  period: "",
-  monthlyContribution: "",
-  profitability: "",
-  ipca: "",
-  cdi: ""
+  initialContribution: '',
+  period: '',
+  monthlyContribution: '',
+  profitability: '',
+  ipca: '',
+  cdi: ''
 };
 
 const schema = {
@@ -30,29 +30,53 @@ const schema = {
   defaultValues,
   resolver: yupResolver(
     yup.object().shape({
-      initialContribution: yup.number("Aporte deve ser um número").required('Aporte é obrigatório'),
-      period: yup.number("Aporte deve ser um número").required('Prazo é obrigatório'),
-      monthlyContribution: yup.number("Aporte deve ser um número").required('Aporte mensal é obrigatório'),
-      profitability: yup.number("Aporte deve ser um número").required('Rentabilidade é obrigatório'),
-      ipca: yup.number("Aporte deve ser um número").required('é obrigatório'),
-      cdi: yup.number("Aporte deve ser um número").required('é obrigatório')
+      initialContribution: yup.number()
+        .typeError('O valor deve ser um número')
+        .required("Aporte é obrigatório")
+        .positive("O número deve ser positivo."),
+      period: yup.number("Aporte deve ser um número")
+        .required('Prazo é obrigatório')
+        .positive("O número deve ser positivo."),
+      monthlyContribution: yup.number()
+        .typeError('O valor deve ser um número')
+        .required('Aporte mensal é obrigatório')
+        .positive("O número deve ser positivo."),
+      profitability: yup.number()
+        .typeError('O valor deve ser um número')
+        .required('Rentabilidade é obrigatório')
+        .positive("O número deve ser positivo."),
+      ipca: yup.number()
+        .typeError('O valor deve ser um número')
+        .required('é obrigatório')
+        .positive("O número deve ser positivo."),
+      cdi: yup.number()
+        .typeError('O valor deve ser um número')
+        .required('é obrigatório')
+        .positive("O número deve ser positivo.")
     }).required()
   )
 };
 
 function App() {
   const form = useForm(schema);
-  const { control, handleSubmit } = form;
+  const { control, formState, handleSubmit, reset } = form;
   const [salaryType, setSalaryType] = useState('bruto');
   const [incomeType, setIncomeType] = useState('pre')
 
-  // useEffect(() => {
-  //   getIndicators()
-  //   getSimulator()
-  // }, [])
+  useEffect(() => {
+    getIndicators()
+      .then((response) => {
+        form.setValue('cdi', response.data.find(f => f.nome === 'cdi').valor);
+        form.setValue('ipca', response.data.find(f => f.nome === 'ipca').valor);
+      })
+      .catch((error) => {
+        console.log('Error ao buscar indicadores')
+      })
+    getSimulator()
+  }, [])
 
   const onSubmit = () => {
-    console.log(getValue)
+    console.log(form.getValues())
   }
   const handleSalaryType = (event, newSelect) => {
     setSalaryType(newSelect);
@@ -126,9 +150,10 @@ function App() {
                 Rendimento
               </Typography>
 
-              <IconButton>
+              <Tooltip title="Tipo de rendimento (Bruto ou Líquido)">
                 <InfoOutlinedIcon />
-              </IconButton>
+              </Tooltip>
+
             </Box>
 
             <Box sx={{
@@ -147,9 +172,9 @@ function App() {
                 Tipos de Indexação
               </Typography>
 
-              <IconButton>
+              <Tooltip title="Tipo de indexação (PRÈ, PÒS e FIXADO)">
                 <InfoOutlinedIcon />
-              </IconButton>
+              </Tooltip>
             </Box>
 
             <ToggleButtonGroup
@@ -179,6 +204,7 @@ function App() {
             </ToggleButtonGroup>
 
             <InputRHF
+              // inputProps={{ pattern: [0 - 9] }}
               name='initialContribution'
               label='Aporte Inicial'
               control={control}
@@ -203,7 +229,8 @@ function App() {
               }}
             />
 
-            <InputRHF
+            <InputMask
+              mask=''
               name='profitability'
               label='Rentabilidade'
               control={control}
@@ -213,6 +240,7 @@ function App() {
             />
 
             <InputRHF
+              disabled
               name='ipca'
               label='IPCA (ao ano)'
               control={control}
@@ -221,6 +249,7 @@ function App() {
               }}
             />
             <InputRHF
+              disabled
               name='cdi'
               label='CDI (ao ano)'
               control={control}
@@ -233,12 +262,15 @@ function App() {
               variant="contained"
               sx={{
                 gridColumn: 'span 3'
-              }}>
+              }}
+              onClick={() => reset()}>
               Limpar campos
             </Button>
 
             <Button
               variant="contained"
+              type='submit'
+              disabled={!formState.isValid}
               sx={{
                 gridColumn: 'span 3'
               }}
@@ -256,7 +288,6 @@ function App() {
               backgroundColor: '#efe54152'
             }}
           >
-
 
           </Box>
 
