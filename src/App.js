@@ -6,13 +6,17 @@ import * as yup from "yup";
 import { Box, Button, Container, ToggleButton, Tooltip, Typography } from "@mui/material";
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
+import DoneIcon from '@mui/icons-material/Done'
 
 import { theme } from './constants/theme'
 import InputRHF from "./components/RHF/InputRHF";
 import { ThemeProvider } from '@mui/material/styles'
 import { getIndicators } from "./services/indicators";
 import { getSimulator } from "./services/simulations";
-import InputMask from "react-input-mask/lib/react-input-mask.development";
+import InputMaskRHF from "./components/RHF/InputMaskRHF";
+import InputCurrencyRHF from "./components/RHF/InputCurrencyRHF";
+import Card from "./components/Card/Card";
+
 
 const mode = 'all';
 
@@ -30,10 +34,11 @@ const schema = {
   defaultValues,
   resolver: yupResolver(
     yup.object().shape({
-      initialContribution: yup.number()
-        .typeError('O valor deve ser um número')
+      initialContribution: yup.string()
+        //.typeError('O valor deve ser um número')
         .required("Aporte é obrigatório")
-        .positive("O número deve ser positivo."),
+      //.positive("O número deve ser positivo."),
+      ,
       period: yup.number("Aporte deve ser um número")
         .required('Prazo é obrigatório')
         .positive("O número deve ser positivo."),
@@ -61,24 +66,25 @@ function App() {
   const form = useForm(schema);
   const { control, formState, handleSubmit, reset } = form;
   const [salaryType, setSalaryType] = useState('bruto');
-  const [incomeType, setIncomeType] = useState('pre')
+  const [incomeType, setIncomeType] = useState('pre');
 
-  useEffect(() => {
-    getIndicators()
-      .then((response) => {
-        form.setValue('cdi', response.data.find(f => f.nome === 'cdi').valor);
-        form.setValue('ipca', response.data.find(f => f.nome === 'ipca').valor);
-      })
-      .catch((error) => {
-        console.log('Error ao buscar indicadores')
-      })
-    getSimulator()
-  }, [])
+  // useEffect(() => {
+  //   getIndicators()
+  //     .then((response) => {
+  //       form.setValue('cdi', response.data.find(f => f.nome === 'cdi').valor);
+  //       form.setValue('ipca', response.data.find(f => f.nome === 'ipca').valor);
+  //     })
+  //     .catch((error) => {
+  //       console.log('Error ao buscar indicadores')
+  //     })
+  //   getSimulator()
+  // }, [])
 
   const onSubmit = () => {
     console.log(form.getValues())
   }
   const handleSalaryType = (event, newSelect) => {
+    console.log(newSelect)
     setSalaryType(newSelect);
 
   };
@@ -94,10 +100,14 @@ function App() {
         sx={{
           background: '#efefef',
           mt: 3,
-          padding: 3
+          padding: 3,
+          pb: 10
         }}
       >
-        <Typography variant="h4" textAlign={"center"} >
+        <Typography sx={{
+          fontWeight: 'bold',
+          fontSize: '30px'
+        }} variant="h4" textAlign={"center"} >
           Simulador de Investimentos
         </Typography>
 
@@ -110,6 +120,7 @@ function App() {
             gridTemplateColumns: "repeat(12, 1fr)",
             rowGap: 1,
             columnGap: 2,
+            mt: 2
 
           }}>
 
@@ -128,7 +139,9 @@ function App() {
               variant="h5"
               textAlign={"left"}
               sx={{
-                gridColumn: 'span 6'
+                gridColumn: 'span 6',
+                fontWeight: 'bold',
+                fontSize: '20px'
               }}
             >
               Simulador
@@ -181,15 +194,31 @@ function App() {
               value={salaryType}
               exclusive
               onChange={handleSalaryType}
+              color='primary'
               sx={{
-                gridColumn: 'span 3'
+                gridColumn: 'span 3',
+
               }}
             >
-              <ToggleButton value="bruto">Bruto</ToggleButton>
-              <ToggleButton value="liquido">Líquido</ToggleButton>
+              <ToggleButton sx={{
+                borderBottomLeftRadius: '8px',
+                borderTopLeftRadius: '8px',
+                width: '38%',
+                borderColor: 'rgb(0,0,0) '
+              }} value="bruto" >
+                {salaryType === 'bruto' && <DoneIcon />} Bruto</ToggleButton>
+              <ToggleButton sx={{
+                borderBottomRightRadius: '8px',
+                borderTopRightRadius: '8px',
+                width: '38%',
+                borderColor: 'rgb(0,0,0) '
+              }}
+                value="liquido">
+                {salaryType === 'liquido' && <DoneIcon />}Líquido</ToggleButton>
             </ToggleButtonGroup>
 
             <ToggleButtonGroup
+           
               value={incomeType}
               exclusive
               onChange={handleIncomeType}
@@ -197,27 +226,52 @@ function App() {
                 gridColumn: 'span 3'
               }}
             >
-              <ToggleButton value="pre">PRÉ</ToggleButton>
-              <ToggleButton value="pos">PÓS</ToggleButton>
-              <ToggleButton value="fixado">FIXADO</ToggleButton>
+              <ToggleButton
+                sx={{
+                  borderBottomLeftRadius: '8px',
+                  borderTopLeftRadius: '8px',
+                  width: '23%',
+                  borderColor: 'rgb(0,0,0) '
+                }} value="pre"  color='warning' >
+                {incomeType === 'pre' && <DoneIcon />}PRÉ</ToggleButton>
+
+              <ToggleButton
+                sx={{
+                  width: '23%',
+                  borderColor: 'rgb(0,0,0) '
+                }} value="pos"  color='secondary'>
+                {incomeType === 'pos' && <DoneIcon />}PÓS</ToggleButton>
+
+              <ToggleButton sx={{
+                borderBottomRightRadius: '8px',
+                borderTopRightRadius: '8px',
+                width: '30%',
+                borderColor: 'rgb(0,0,0) '
+              }} value="fixado"  color='secondary'>
+                {incomeType === 'fixado' && <DoneIcon />}FIXADO</ToggleButton>
 
             </ToggleButtonGroup>
 
             <InputRHF
-              // inputProps={{ pattern: [0 - 9] }}
+              inputProps={{ inputMode: 'numeric', pattern: '[0-9]*' }}
               name='initialContribution'
               label='Aporte Inicial'
               control={control}
               sx={{
-                gridColumn: 'span 3'
+                gridColumn: 'span 3',
+                width: '75%',
+                mt: 3
               }}
             />
-            <InputRHF
+
+            <InputCurrencyRHF
               name='monthlyContribution'
               label='Aporte Mensal'
               control={control}
               sx={{
-                gridColumn: 'span 3'
+                gridColumn: 'span 3',
+                width: '75%',
+                mt: 3
               }}
             />
             <InputRHF
@@ -225,17 +279,21 @@ function App() {
               label='Prazo (em meses)'
               control={control}
               sx={{
-                gridColumn: 'span 3'
+                gridColumn: 'span 3',
+                width: '75%',
+                mt: 3
               }}
             />
 
-            <InputMask
-              mask=''
+            <InputRHF
+              // mask='9999'
               name='profitability'
               label='Rentabilidade'
               control={control}
               sx={{
-                gridColumn: 'span 3'
+                gridColumn: 'span 3',
+                width: '75%',
+                mt: 3
               }}
             />
 
@@ -245,7 +303,10 @@ function App() {
               label='IPCA (ao ano)'
               control={control}
               sx={{
-                gridColumn: 'span 3'
+                gridColumn: 'span 3',
+                width: '75%',
+                mt: 3,
+                mb: 4
               }}
             />
             <InputRHF
@@ -254,14 +315,22 @@ function App() {
               label='CDI (ao ano)'
               control={control}
               sx={{
-                gridColumn: 'span 3'
+                gridColumn: 'span 3',
+                width: '75%',
+                mt: 3,
+                mb: 4
               }}
             />
 
             <Button
-              variant="contained"
+              variant="outlined"
               sx={{
-                gridColumn: 'span 3'
+                gridColumn: 'span 3',
+                width: '75%',
+                height: '50px',
+                borderRadius: '6px',
+                fontWeight: 'bold',
+                fontSize: '14px'
               }}
               onClick={() => reset()}>
               Limpar campos
@@ -272,28 +341,83 @@ function App() {
               type='submit'
               disabled={!formState.isValid}
               sx={{
-                gridColumn: 'span 3'
+                gridColumn: 'span 3',
+                width: '75%',
+                height: '50px',
+                borderRadius: '6px',
+                fontWeight: 'bold',
+                fontSize: '14px'
               }}
             >
               Simular
             </Button>
-
 
           </Box>
 
           {/* GRAFICO  */}
           <Box
             sx={{
-              gridColumn: 'span 6',
-              backgroundColor: '#efe54152'
+              display: "grid",
+              gridTemplateColumns: "repeat(6, 1fr)",
+              rowGap: 1,
+              columnGap: 6,
+              gridColumn: 'span 6'
+
             }}
           >
+            <Typography
+              variant="h5"
+              textAlign={"left"}
+              sx={{
+                gridColumn: 'span 6',
+                fontWeight: 'bold',
+                fontSize: '20px'
+              }}
+            >
+              Resultado da Simulação
+            </Typography>
+
+            <Card title={'Valor final Bruto'} value={'10'}
+              sx={{
+                gridColumn: 'span 2',
+
+              }} />
+
+            <Card title={'Alíquota do IR'} value={'10'}
+              sx={{
+                gridColumn: 'span 2',
+
+              }} />
+
+            <Card title={'Valor Pago em IR'} value={'10'}
+              sx={{
+                gridColumn: 'span 2',
+
+              }} />
+
+            <Card title={'Valor final Líquido'} value={'10'}
+              sx={{
+                gridColumn: 'span 2',
+
+              }} />
+
+            <Card title={'Valor Total Investido'} value={'10'}
+              sx={{
+                gridColumn: 'span 2',
+
+              }} />
+
+            <Card title={'Ganho Líquido'} value={'10'}
+              sx={{
+                gridColumn: 'span 2',
+
+              }} />
 
           </Box>
 
         </Box>
       </Container>
-    </ThemeProvider>
+    </ThemeProvider >
   );
 }
 
