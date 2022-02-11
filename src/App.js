@@ -16,6 +16,8 @@ import { getSimulator } from "./services/simulations";
 import InputMaskRHF from "./components/RHF/InputMaskRHF";
 import InputCurrencyRHF from "./components/RHF/InputCurrencyRHF";
 import Card from "./components/Card/Card";
+import { Grafic } from "./components/Grafic/Grafic";
+
 
 
 const mode = 'all';
@@ -68,28 +70,32 @@ function App() {
   const [salaryType, setSalaryType] = useState('bruto');
   const [incomeType, setIncomeType] = useState('pre');
 
-  // useEffect(() => {
-  //   getIndicators()
-  //     .then((response) => {
-  //       form.setValue('cdi', response.data.find(f => f.nome === 'cdi').valor);
-  //       form.setValue('ipca', response.data.find(f => f.nome === 'ipca').valor);
-  //     })
-  //     .catch((error) => {
-  //       console.log('Error ao buscar indicadores')
-  //     })
-  //   getSimulator()
-  // }, [])
+  useEffect(() => {
+    getIndicators()
+      .then((response) => {
+        form.setValue('cdi', response.data.find(f => f.nome === 'cdi').valor);
+        form.setValue('ipca', response.data.find(f => f.nome === 'ipca').valor);
+      })
+      .catch((error) => {
+        console.log('Error ao buscar indicadores')
+      })
+    getSimulator()
+  }, [])
 
   const onSubmit = () => {
     console.log(form.getValues())
   }
   const handleSalaryType = (event, newSelect) => {
-    console.log(newSelect)
-    setSalaryType(newSelect);
+    if (newSelect !== null) {
+      setSalaryType(newSelect);
+    }
 
   };
+
   const handleIncomeType = (event, newSelect) => {
-    setIncomeType(newSelect);
+    if (newSelect !== null) {
+      setIncomeType(newSelect);
+    }
   }
 
   return (
@@ -131,7 +137,6 @@ function App() {
               rowGap: 1,
               columnGap: 2,
               gridColumn: 'span 6'
-
             }}
           >
 
@@ -194,33 +199,37 @@ function App() {
               value={salaryType}
               exclusive
               onChange={handleSalaryType}
-              color='primary'
+              touchRippleRef={salaryType}
               sx={{
-                gridColumn: 'span 3',
-
+                gridColumn: 'span 3'
               }}
             >
-              <ToggleButton sx={{
-                borderBottomLeftRadius: '8px',
-                borderTopLeftRadius: '8px',
-                width: '38%',
-                borderColor: 'rgb(0,0,0) '
-              }} value="bruto" >
+              <ToggleButton
+
+                sx={{
+                  borderBottomLeftRadius: '8px',
+                  borderTopLeftRadius: '8px',
+                  width: '38%',
+                  borderColor: 'rgb(0,0,0) '
+                }}
+                value='bruto'>
                 {salaryType === 'bruto' && <DoneIcon />} Bruto</ToggleButton>
-              <ToggleButton sx={{
-                borderBottomRightRadius: '8px',
-                borderTopRightRadius: '8px',
-                width: '38%',
-                borderColor: 'rgb(0,0,0) '
-              }}
-                value="liquido">
+              <ToggleButton
+
+                sx={{
+                  borderBottomRightRadius: '8px',
+                  borderTopRightRadius: '8px',
+                  width: '38%',
+                  borderColor: 'rgb(0,0,0) '
+                }}
+                value='liquido'>
                 {salaryType === 'liquido' && <DoneIcon />}Líquido</ToggleButton>
             </ToggleButtonGroup>
 
             <ToggleButtonGroup
-           
+
               value={incomeType}
-              exclusive
+              exclusive={true}
               onChange={handleIncomeType}
               sx={{
                 gridColumn: 'span 3'
@@ -232,14 +241,14 @@ function App() {
                   borderTopLeftRadius: '8px',
                   width: '23%',
                   borderColor: 'rgb(0,0,0) '
-                }} value="pre"  color='warning' >
+                }} value='pre' >
                 {incomeType === 'pre' && <DoneIcon />}PRÉ</ToggleButton>
 
               <ToggleButton
                 sx={{
                   width: '23%',
                   borderColor: 'rgb(0,0,0) '
-                }} value="pos"  color='secondary'>
+                }} value='pos' >
                 {incomeType === 'pos' && <DoneIcon />}PÓS</ToggleButton>
 
               <ToggleButton sx={{
@@ -247,7 +256,7 @@ function App() {
                 borderTopRightRadius: '8px',
                 width: '30%',
                 borderColor: 'rgb(0,0,0) '
-              }} value="fixado"  color='secondary'>
+              }} value='fixado' >
                 {incomeType === 'fixado' && <DoneIcon />}FIXADO</ToggleButton>
 
             </ToggleButtonGroup>
@@ -330,7 +339,15 @@ function App() {
                 height: '50px',
                 borderRadius: '6px',
                 fontWeight: 'bold',
-                fontSize: '14px'
+                fontSize: '14px',
+                borderColor: '#000000',
+                color: '#000000',
+                ':hover': {
+                  backgroundColor: '#ed8e53',
+                  color: '#000000',
+                  borderColor: '#000000',
+                },
+
               }}
               onClick={() => reset()}>
               Limpar campos
@@ -346,7 +363,14 @@ function App() {
                 height: '50px',
                 borderRadius: '6px',
                 fontWeight: 'bold',
-                fontSize: '14px'
+                fontSize: '14px',
+                backgroundColor: '#ed8e53',
+                color: '#000000',
+                ':hover': {
+                  backgroundColor: '#ed8e53',
+                  color: '#000000',
+                  borderColor: '#000000',
+                }
               }}
             >
               Simular
@@ -362,7 +386,6 @@ function App() {
               rowGap: 1,
               columnGap: 6,
               gridColumn: 'span 6'
-
             }}
           >
             <Typography
@@ -380,38 +403,56 @@ function App() {
             <Card title={'Valor final Bruto'} value={'10'}
               sx={{
                 gridColumn: 'span 2',
-
               }} />
 
             <Card title={'Alíquota do IR'} value={'10'}
               sx={{
                 gridColumn: 'span 2',
-
               }} />
 
             <Card title={'Valor Pago em IR'} value={'10'}
               sx={{
                 gridColumn: 'span 2',
-
               }} />
+
 
             <Card title={'Valor final Líquido'} value={'10'}
               sx={{
                 gridColumn: 'span 2',
-
               }} />
 
             <Card title={'Valor Total Investido'} value={'10'}
               sx={{
                 gridColumn: 'span 2',
-
               }} />
 
             <Card title={'Ganho Líquido'} value={'10'}
               sx={{
                 gridColumn: 'span 2',
-
               }} />
+
+            <Box
+              sx={{
+                display: "grid",
+                gridTemplateColumns: "repeat(6, 1fr)",
+                rowGap: 1,
+                columnGap: 6,
+                gridColumn: 'span 6'
+              }}
+            >
+              <Typography
+                variant="subtitle1"
+                textAlign={"left"}
+                sx={{ gridColumn: 'span 6' }}
+              >
+                Projeção de Valores
+              </Typography>
+              <Grafic
+                sx={{
+                  gridColumn: 'span 6',
+                }} />
+            </Box>
+
 
           </Box>
 
