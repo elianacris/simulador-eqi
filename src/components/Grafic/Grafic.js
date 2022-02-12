@@ -1,7 +1,6 @@
 import React from 'react';
 import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend, } from 'chart.js';
 import { Bar } from 'react-chartjs-2';
-import faker from 'faker';
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
 
@@ -10,41 +9,58 @@ export const options = {
     plugins: {
         legend: {
             position: 'bottom',
+
         },
     },
+    type: 'bar',
     scales: {
         x: {
             grid: {
                 display: false,
             },
+
         },
         y: {
+
             grid: {
                 display: false,
             },
+            ticks: {
+                display: false,
+
+            },
+            label: {
+                display: true,
+                fontSize: 15,
+                fontColor: "black",
+                fontStyle: "bold",
+                labelString: "True Positive Rate"
+            }
         },
 
     },
 };
 
-const labels = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17];
 
-export const data = {
-    labels,
-    datasets: [
+
+export function Grafic(props) {
+    return <Bar options={options} data={
         {
-            label: "Com Aporte",
-            data: labels.map(() => faker.datatype.number({ min: 0, max: 1000 })),
-            backgroundColor: "#ed8e53"
-        },
-        {
-            label: "Sem Aporte",
-            data: labels.map(() => faker.datatype.number({ min: 0, max: 1000 })),
-            backgroundColor: "#000000"
+            labels: props.labels,
+            datasets: [
+                {
+                    stack: 1,
+                    label: "Com Aporte",
+                    data: props.dataSetSemAporte,
+                    backgroundColor: "#000000"
+                },
+                {
+                    stack: 1,
+                    label: "Sem Aporte",
+                    data: props.dataSetComAporte,
+                    backgroundColor: "#ed8e53"
+                }
+            ]
         }
-    ]
-};
-
-export function Grafic() {
-    return <Bar options={options} data={data} />;
+    } />;
 }

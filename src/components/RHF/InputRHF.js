@@ -12,9 +12,9 @@ const InputRHF = (props) => {
 
     return (
         <TextField
+            {...field}
             disabled={disabled ? true : false}
             inputProps={{ ...inputProps }}
-            {...field}
             inputRef={ref}
             label={label}
             error={invalid}
@@ -24,7 +24,6 @@ const InputRHF = (props) => {
             variant="standard"
             sx={{ ...sx }}
             color={color}
-
         />
     )
 }

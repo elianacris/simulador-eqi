@@ -20,5 +20,29 @@ export const theme = createTheme({
 
             }
         }
-    }
+
+    },
+
+    //MuiFormControl-root MuiTextField-root
+    // input: {
+    //     MuiTextField: {
+    //         styleOverrides: {
+    //             root: {
+    //                 color: '#578453'
+    //                 // '&.MuiTextField-root': {
+    //                 //     width: '75%',
+    //                 //     mt: 3,
+    //                 //     gridColumn: {
+    //                 //         md: 'span 3',
+    //                 //         sm: 'span 3',
+    //                 //         xs: 'span 6'
+    //                 //     }
+    //                 // }
+    //             }
+
+    //         }
+    //     }
+
+    // }
+
 });

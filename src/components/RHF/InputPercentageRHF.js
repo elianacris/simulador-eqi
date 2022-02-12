@@ -21,16 +21,15 @@ const NumberFormatCustom = React.forwardRef(function NumberFormatCustom(props, r
         });
       }}
       isNumericString
-      prefix="R$"
+      suffix="%"
       decimalScale={2}
       decimalSeparator=","
       thousandSeparator="."
-      fixedDecimalScale={true}
     />
   );
 });
 
-const InputCurrencyRHF = (props) => {
+const InputPercentageRHF = (props) => {
   const { label, required, name, control, sx, placeholder, disabled } = props;
   const { field, fieldState: { invalid, error } } = useController({ name, control });
   const { ref } = field;
@@ -48,18 +47,11 @@ const InputCurrencyRHF = (props) => {
       required={Boolean(required)}
       placeholder={placeholder}
       variant="standard"
-      sx={{
-        gridColumn: {
-          md: 'span 3',
-          sm: 'span 3',
-          xs: 'span 6'
-        },
-        ...sx
-      }}
+      sx={{ ...sx }}
     />
 
   )
 }
-export default InputCurrencyRHF;
+export default InputPercentageRHF;
 
 

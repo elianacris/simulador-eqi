@@ -1,74 +1,39 @@
 import React, { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
-import { yupResolver } from '@hookform/resolvers/yup';
-import * as yup from "yup";
 
+
+import { ThemeProvider } from '@mui/material/styles'
 import { Box, Button, Container, ToggleButton, Tooltip, Typography } from "@mui/material";
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
 import DoneIcon from '@mui/icons-material/Done'
 
 import { theme } from './constants/theme'
-import InputRHF from "./components/RHF/InputRHF";
-import { ThemeProvider } from '@mui/material/styles'
 import { getIndicators } from "./services/indicators";
 import { getSimulator } from "./services/simulations";
-import InputMaskRHF from "./components/RHF/InputMaskRHF";
+import InputRHF from "./components/RHF/InputRHF";
+import InputPercentageRHF from "./components/RHF/InputPercentageRHF";
 import InputCurrencyRHF from "./components/RHF/InputCurrencyRHF";
 import Card from "./components/Card/Card";
 import { Grafic } from "./components/Grafic/Grafic";
+import simulationSchemaValidation from "./util/simulationSchemaValidator";
 
-
-
-const mode = 'all';
-
-const defaultValues = {
-  initialContribution: '',
-  period: '',
-  monthlyContribution: '',
-  profitability: '',
-  ipca: '',
-  cdi: ''
-};
-
-const schema = {
-  mode,
-  defaultValues,
-  resolver: yupResolver(
-    yup.object().shape({
-      initialContribution: yup.string()
-        //.typeError('O valor deve ser um número')
-        .required("Aporte é obrigatório")
-      //.positive("O número deve ser positivo."),
-      ,
-      period: yup.number("Aporte deve ser um número")
-        .required('Prazo é obrigatório')
-        .positive("O número deve ser positivo."),
-      monthlyContribution: yup.number()
-        .typeError('O valor deve ser um número')
-        .required('Aporte mensal é obrigatório')
-        .positive("O número deve ser positivo."),
-      profitability: yup.number()
-        .typeError('O valor deve ser um número')
-        .required('Rentabilidade é obrigatório')
-        .positive("O número deve ser positivo."),
-      ipca: yup.number()
-        .typeError('O valor deve ser um número')
-        .required('é obrigatório')
-        .positive("O número deve ser positivo."),
-      cdi: yup.number()
-        .typeError('O valor deve ser um número')
-        .required('é obrigatório')
-        .positive("O número deve ser positivo.")
-    }).required()
-  )
-};
 
 function App() {
-  const form = useForm(schema);
+  const form = useForm(simulationSchemaValidation);
   const { control, formState, handleSubmit, reset } = form;
   const [salaryType, setSalaryType] = useState('bruto');
   const [incomeType, setIncomeType] = useState('pre');
+
+  const [result, setResult] = useState({
+    valorFinalBruto: 0,
+    aliquotaIR: 0,
+    valorPagoIR: 0,
+    valorTotalInvestido: 0,
+    valorFinalLiquido: 0,
+    ganhoLiquido: 0,
+    graficoValores: {}
+  });
 
   useEffect(() => {
     getIndicators()
@@ -76,15 +41,48 @@ function App() {
         form.setValue('cdi', response.data.find(f => f.nome === 'cdi').valor);
         form.setValue('ipca', response.data.find(f => f.nome === 'ipca').valor);
       })
-      .catch((error) => {
+      .catch(() => {
         console.log('Error ao buscar indicadores')
       })
-    getSimulator()
   }, [])
 
   const onSubmit = () => {
-    console.log(form.getValues())
+    getSimulator(incomeType, salaryType)
+      .then((response) => {
+
+        setResult({
+          valorFinalBruto: response.data[0].valorFinalBruto,
+          aliquotaIR: response.data[0].aliquotaIR,
+          valorPagoIR: response.data[0].valorPagoIR,
+          valorTotalInvestido: response.data[0].valorTotalInvestido,
+          valorFinalLiquido: response.data[0].valorFinalLiquido,
+          ganhoLiquido: response.data[0].ganhoLiquido,
+          graficoValores: {
+            labels: Object.keys(response.data[0].graficoValores.comAporte),
+            dataSetComAporte: Object.values(response.data[0].graficoValores.comAporte),
+            dataSetSemAporte: Object.values(response.data[0].graficoValores.semAporte)
+          }
+        });
+
+      })
+      .catch((error) => {
+        console.log('Error ao buscar simulações', error)
+      })
   }
+
+  const onCleanForm = () => {
+    reset();
+    setResult({
+      valorFinalBruto: 0,
+      aliquotaIR: 0,
+      valorPagoIR: 0,
+      valorTotalInvestido: 0,
+      valorFinalLiquido: 0,
+      ganhoLiquido: 0,
+      graficoValores: {}
+    })
+  }
+
   const handleSalaryType = (event, newSelect) => {
     if (newSelect !== null) {
       setSalaryType(newSelect);
@@ -102,12 +100,13 @@ function App() {
     <ThemeProvider theme={theme}>
 
       <Container
-        maxWidth="xl"
+        maxWidth={"lg"}
+        disableGutters={false}
         sx={{
           background: '#efefef',
-          mt: 3,
+          // mt: 3,
           padding: 3,
-          pb: 10
+          // pb: 10
         }}
       >
         <Typography sx={{
@@ -127,16 +126,18 @@ function App() {
             rowGap: 1,
             columnGap: 2,
             mt: 2
-
           }}>
 
           <Box
             sx={{
               display: "grid",
               gridTemplateColumns: "repeat(6, 1fr)",
-              rowGap: 1,
               columnGap: 2,
-              gridColumn: 'span 6'
+              gridColumn: {
+                lg: 'span 6',
+                md: 'span 12',
+                xs: 'span 12'
+              }
             }}
           >
 
@@ -157,13 +158,25 @@ function App() {
               display: "grid",
               gridTemplateColumns: "repeat(3, 1fr)",
               rowGap: 1,
+              gridRowStart: 0,
               columnGap: 2,
-              gridColumn: 'span 3'
+              gridColumn: {
+                md: 'span 3',
+                sm: 'span 3',
+                xs: 'span 6'
+              },
+              alignItems: 'center',
+              mt: {
+                xs: '12px',
+                sm: '0px'
+              }
             }}>
               <Typography
                 variant="subtitle1"
                 textAlign={"left"}
-                sx={{ gridColumn: 'span 2' }}
+                sx={{
+                  gridColumn: 'span 2'
+                }}
               >
                 Rendimento
               </Typography>
@@ -172,6 +185,42 @@ function App() {
                 <InfoOutlinedIcon />
               </Tooltip>
 
+              <ToggleButtonGroup
+                value={salaryType}
+                exclusive
+                onChange={handleSalaryType}
+                touchRippleRef={salaryType}
+                sx={{
+                  gridColumn: {
+                    md: 'span 3',
+                    sm: 'span 6',
+                    xs: 'span 6'
+                  },
+                  maxHeight: 50
+                }}
+              >
+                <ToggleButton
+
+                  sx={{
+                    borderBottomLeftRadius: '8px',
+                    borderTopLeftRadius: '8px',
+                    width: '38%',
+                    borderColor: 'rgb(0,0,0) '
+                  }}
+                  value='bruto'>
+                  {salaryType === 'bruto' && <DoneIcon />} Bruto</ToggleButton>
+                <ToggleButton
+
+                  sx={{
+                    borderBottomRightRadius: '8px',
+                    borderTopRightRadius: '8px',
+                    width: '38%',
+                    borderColor: 'rgb(0,0,0) '
+                  }}
+                  value='liquido'>
+                  {salaryType === 'liquido' && <DoneIcon />}Líquido</ToggleButton>
+              </ToggleButtonGroup>
+
             </Box>
 
             <Box sx={{
@@ -179,7 +228,16 @@ function App() {
               gridTemplateColumns: "repeat(3, 1fr)",
               rowGap: 1,
               columnGap: 2,
-              gridColumn: 'span 3'
+              gridColumn: {
+                md: 'span 3',
+                sm: 'span 3',
+                xs: 'span 6'
+              },
+              alignItems: 'center',
+              mt: {
+                xs: '12px',
+                sm: '0px'
+              }
             }}>
 
               <Typography
@@ -193,83 +251,65 @@ function App() {
               <Tooltip title="Tipo de indexação (PRÈ, PÒS e FIXADO)">
                 <InfoOutlinedIcon />
               </Tooltip>
-            </Box>
 
-            <ToggleButtonGroup
-              value={salaryType}
-              exclusive
-              onChange={handleSalaryType}
-              touchRippleRef={salaryType}
-              sx={{
-                gridColumn: 'span 3'
-              }}
-            >
-              <ToggleButton
 
+              <ToggleButtonGroup
+
+                value={incomeType}
+                exclusive={true}
+                onChange={handleIncomeType}
                 sx={{
-                  borderBottomLeftRadius: '8px',
-                  borderTopLeftRadius: '8px',
-                  width: '38%',
-                  borderColor: 'rgb(0,0,0) '
+                  gridColumn: {
+                    md: 'span 3',
+                    sm: 'span 6',
+                    xs: 'span 6'
+                  },
+                  maxHeight: 50
                 }}
-                value='bruto'>
-                {salaryType === 'bruto' && <DoneIcon />} Bruto</ToggleButton>
-              <ToggleButton
+              >
+                <ToggleButton
+                  sx={{
+                    borderBottomLeftRadius: '8px',
+                    borderTopLeftRadius: '8px',
+                    width: '23%',
+                    borderColor: 'rgb(0,0,0) '
+                  }} value='pre' >
+                  {incomeType === 'pre' && <DoneIcon />}PRÉ</ToggleButton>
 
-                sx={{
+                <ToggleButton
+                  sx={{
+                    width: '23%',
+                    borderColor: 'rgb(0,0,0) '
+                  }} value='pos' >
+                  {incomeType === 'pos' && <DoneIcon />}PÓS</ToggleButton>
+
+                <ToggleButton sx={{
                   borderBottomRightRadius: '8px',
                   borderTopRightRadius: '8px',
-                  width: '38%',
+                  width: '30%',
                   borderColor: 'rgb(0,0,0) '
-                }}
-                value='liquido'>
-                {salaryType === 'liquido' && <DoneIcon />}Líquido</ToggleButton>
-            </ToggleButtonGroup>
+                }} value='fixado' >
+                  {incomeType === 'fixado' && <DoneIcon />}FIXADO</ToggleButton>
 
-            <ToggleButtonGroup
+              </ToggleButtonGroup>
+            </Box>
 
-              value={incomeType}
-              exclusive={true}
-              onChange={handleIncomeType}
-              sx={{
-                gridColumn: 'span 3'
-              }}
-            >
-              <ToggleButton
-                sx={{
-                  borderBottomLeftRadius: '8px',
-                  borderTopLeftRadius: '8px',
-                  width: '23%',
-                  borderColor: 'rgb(0,0,0) '
-                }} value='pre' >
-                {incomeType === 'pre' && <DoneIcon />}PRÉ</ToggleButton>
 
-              <ToggleButton
-                sx={{
-                  width: '23%',
-                  borderColor: 'rgb(0,0,0) '
-                }} value='pos' >
-                {incomeType === 'pos' && <DoneIcon />}PÓS</ToggleButton>
-
-              <ToggleButton sx={{
-                borderBottomRightRadius: '8px',
-                borderTopRightRadius: '8px',
-                width: '30%',
-                borderColor: 'rgb(0,0,0) '
-              }} value='fixado' >
-                {incomeType === 'fixado' && <DoneIcon />}FIXADO</ToggleButton>
-
-            </ToggleButtonGroup>
-
-            <InputRHF
-              inputProps={{ inputMode: 'numeric', pattern: '[0-9]*' }}
+            <InputCurrencyRHF
               name='initialContribution'
               label='Aporte Inicial'
               control={control}
               sx={{
-                gridColumn: 'span 3',
-                width: '75%',
-                mt: 3
+                width: {
+                  md: '75%',
+                  xs: '90%'
+                },
+                mt: 3,
+                gridColumn: {
+                  md: 'span 3',
+                  sm: 'span 3',
+                  xs: 'span 6'
+                }
               }}
             />
 
@@ -278,54 +318,91 @@ function App() {
               label='Aporte Mensal'
               control={control}
               sx={{
-                gridColumn: 'span 3',
-                width: '75%',
-                mt: 3
+                width: {
+                  md: '75%',
+                  xs: '90%'
+                },
+                mt: 3,
+                gridColumn: {
+                  md: 'span 3',
+                  sm: 'span 3',
+                  xs: 'span 6'
+                }
               }}
             />
+
             <InputRHF
+              inputProps={{ inputMode: 'numeric', pattern: '[0-9]*' }}
               name='period'
               label='Prazo (em meses)'
               control={control}
               sx={{
-                gridColumn: 'span 3',
-                width: '75%',
-                mt: 3
+                width: {
+                  md: '75%',
+                  xs: '90%'
+                },
+                mt: 3,
+                gridColumn: {
+                  md: 'span 3',
+                  sm: 'span 3',
+                  xs: 'span 6'
+                }
               }}
             />
 
-            <InputRHF
-              // mask='9999'
+            <InputPercentageRHF
               name='profitability'
               label='Rentabilidade'
               control={control}
               sx={{
-                gridColumn: 'span 3',
-                width: '75%',
-                mt: 3
+                width: {
+                  md: '75%',
+                  xs: '90%'
+                },
+                mt: 3,
+                gridColumn: {
+                  md: 'span 3',
+                  sm: 'span 3',
+                  xs: 'span 6'
+                }
               }}
             />
 
-            <InputRHF
+            <InputPercentageRHF
               disabled
               name='ipca'
               label='IPCA (ao ano)'
               control={control}
               sx={{
-                gridColumn: 'span 3',
-                width: '75%',
+                gridColumn: {
+                  md: 'span 3',
+                  sm: 'span 3',
+                  xs: 'span 6'
+                },
+                width: {
+                  md: '75%',
+                  xs: '90%'
+                },
                 mt: 3,
                 mb: 4
               }}
             />
-            <InputRHF
+
+            <InputPercentageRHF
               disabled
               name='cdi'
               label='CDI (ao ano)'
               control={control}
               sx={{
-                gridColumn: 'span 3',
-                width: '75%',
+                gridColumn: {
+                  md: 'span 3',
+                  sm: 'span 3',
+                  xs: 'span 6'
+                },
+                width: {
+                  md: '75%',
+                  xs: '90%'
+                },
                 mt: 3,
                 mb: 4
               }}
@@ -349,14 +426,14 @@ function App() {
                 },
 
               }}
-              onClick={() => reset()}>
+              onClick={onCleanForm}>
               Limpar campos
             </Button>
 
             <Button
               variant="contained"
               type='submit'
-              disabled={!formState.isValid}
+              disabled={!formState.isValid} 
               sx={{
                 gridColumn: 'span 3',
                 width: '75%',
@@ -378,14 +455,17 @@ function App() {
 
           </Box>
 
-          {/* GRAFICO  */}
           <Box
             sx={{
               display: "grid",
               gridTemplateColumns: "repeat(6, 1fr)",
               rowGap: 1,
               columnGap: 6,
-              gridColumn: 'span 6'
+              gridColumn: {
+                lg: 'span 6',
+                md: 'span 12',
+                xs: 'span 12'
+              }
             }}
           >
             <Typography
@@ -394,41 +474,92 @@ function App() {
               sx={{
                 gridColumn: 'span 6',
                 fontWeight: 'bold',
-                fontSize: '20px'
+                fontSize: '20px',
+                mb: 2
               }}
             >
               Resultado da Simulação
             </Typography>
 
-            <Card title={'Valor final Bruto'} value={'10'}
+            <Card
+              prefix={'R$'}
+              title={'Valor final Bruto'}
+              value={result.valorFinalBruto}
               sx={{
-                gridColumn: 'span 2',
+                gridColumn: {
+                  lg: 'span 2',
+                  md: 'span 3',
+                  sm: 'span 3',
+                  xs: 'span 6'
+                }
               }} />
 
-            <Card title={'Alíquota do IR'} value={'10'}
+            <Card
+              suffix={'%'}
+              title={'Alíquota do IR'}
+              value={result.aliquotaIR}
               sx={{
-                gridColumn: 'span 2',
+                gridColumn: {
+                  lg: 'span 2',
+                  md: 'span 3',
+                  sm: 'span 3',
+                  xs: 'span 6'
+                }
               }} />
 
-            <Card title={'Valor Pago em IR'} value={'10'}
+            <Card
+              prefix={'R$'}
+              title={'Valor Pago em IR'}
+              value={result.valorPagoIR}
               sx={{
-                gridColumn: 'span 2',
+                gridColumn: {
+                  lg: 'span 2',
+                  md: 'span 3',
+                  sm: 'span 3',
+                  xs: 'span 6'
+                }
               }} />
 
 
-            <Card title={'Valor final Líquido'} value={'10'}
+            <Card
+              prefix={'R$'}
+              title={'Valor final Líquido'}
+              value={result.valorFinalLiquido}
+              color={'#008000'}
               sx={{
-                gridColumn: 'span 2',
+                gridColumn: {
+                  lg: 'span 2',
+                  md: 'span 3',
+                  sm: 'span 3',
+                  xs: 'span 6'
+                }
               }} />
 
-            <Card title={'Valor Total Investido'} value={'10'}
+            <Card
+              prefix={'R$'}
+              title={'Valor Total Investido'}
+              value={result.valorTotalInvestido}
               sx={{
-                gridColumn: 'span 2',
+                gridColumn: {
+                  lg: 'span 2',
+                  md: 'span 3',
+                  sm: 'span 3',
+                  xs: 'span 6'
+                }
               }} />
 
-            <Card title={'Ganho Líquido'} value={'10'}
+            <Card
+              prefix={'R$'}
+              title={'Ganho Líquido'}
+              value={result.ganhoLiquido}
+              color={'#008000'}
               sx={{
-                gridColumn: 'span 2',
+                gridColumn: {
+                  lg: 'span 2',
+                  md: 'span 3',
+                  sm: 'span 3',
+                  xs: 'span 6'
+                }
               }} />
 
             <Box
@@ -448,12 +579,13 @@ function App() {
                 Projeção de Valores
               </Typography>
               <Grafic
+                labels={result.graficoValores.labels}
+                dataSetComAporte={result.graficoValores.dataSetComAporte}
+                dataSetSemAporte={result.graficoValores.dataSetSemAporte}
                 sx={{
                   gridColumn: 'span 6',
                 }} />
             </Box>
-
-
           </Box>
 
         </Box>
