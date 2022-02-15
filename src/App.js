@@ -208,7 +208,9 @@ function App() {
                     borderColor: 'rgb(0,0,0) '
                   }}
                   value='bruto'>
-                  {salaryType === 'bruto' && <DoneIcon />} Bruto</ToggleButton>
+                  {salaryType === 'bruto' && <DoneIcon />}
+                  <Typography>Bruto</Typography>
+                </ToggleButton>
                 <ToggleButton
 
                   sx={{
@@ -433,7 +435,7 @@ function App() {
             <Button
               variant="contained"
               type='submit'
-              disabled={!formState.isValid} 
+              disabled={!formState.isValid}
               sx={{
                 gridColumn: 'span 3',
                 width: '75%',
