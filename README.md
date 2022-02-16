@@ -36,13 +36,13 @@ Para rodar a aplicação, execute os próximos passos:
 
 1. Faça o clone do projeto
 ```
-https://github.com/elianacris/Rappi4.git
+https://github.com/elianacris/simulador-eqi
 ```
 
 2. Entre na pasta
 
 ```
-cd carver-labe-food1
+cd Simulador-de-Investimentos-EQI
 ```
 
 3. Instale as dependências
