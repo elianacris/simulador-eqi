@@ -11,24 +11,18 @@ Desenvolver um website semelhante a um simulador de investimento, utilizando o [
 - [Material-UI](https://mui.com/)
 - [Axios](https://axios-http.com/) 
 - [React-number-format](https://www.npmjs.com/package/react-number-format)
-- [Test Unitário](https://testing-library.com/)
-- 
+- [Test Libary](https://testing-library.com/)
+- [Docker](https://www.docker.com/)
 ## Começando
 
 As instruções a seguir irão lhe proporcionar uma cópia deste projeto e de como rodar em sua máquina local para propósito de desenvolvimento e testes. Veja na sessão de [deployment](#Deployment) para saber com mais detalhes de como dar deploy em sua aplicação.
 
 ### Pre-requisitos
-Dependências necessárias para se instalar o software e como instalá-las.
+Para executar este container, você precisará do docker instalado.
 
-1. Tenha certeza que você tenha o node instalado em sua máquina (https://nodejs.org/)
-
-```
-node -v
-```
-2. E também o gerenciador de pacotes NPM (https://www.npmjs.com/)
-```
-npm -v
-```
+* [Windows](https://docs.docker.com/windows/started)
+* [OS X](https://docs.docker.com/mac/started/)
+* [Linux](https://docs.docker.com/linux/started/)
 
 ### Instalação
 
@@ -45,20 +39,14 @@ https://github.com/elianacris/simulador-eqi
 cd Simulador-de-Investimentos-EQI
 ```
 
-3. Instale as dependências
+3. Executar o comando para criar os containers
 
 ```
-npm install
+docker-compose up
 ```
 
-4. Em seguida rode a aplicação
+4. Acesse no seu navegador o link de execução
 
 ```
-npm start
-```
-
-5. Acesse no seu navegador o link de execução
-
-```
-http://localhost:3000
+http://localhost:3001
 ```
