@@ -36,7 +36,7 @@ https://github.com/elianacris/simulador-eqi
 2. Entre na pasta
 
 ```
-cd Simulador-de-Investimentos-EQI
+cd simulador-eqi
 ```
 
 3. Executar o comando para criar os containers
