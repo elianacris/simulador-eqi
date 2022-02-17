@@ -36,6 +36,10 @@ function App() {
   });
 
   useEffect(() => {
+    indicators();
+  }, [])
+
+  const indicators = () => {
     getIndicators()
       .then((response) => {
         form.setValue('cdi', response.data.find(f => f.nome === 'cdi').valor);
@@ -44,7 +48,7 @@ function App() {
       .catch(() => {
         console.log('Error ao buscar indicadores')
       })
-  }, [])
+  }
 
   const onSubmit = () => {
     getSimulator(incomeType, salaryType)
@@ -80,7 +84,8 @@ function App() {
       valorFinalLiquido: 0,
       ganhoLiquido: 0,
       graficoValores: {}
-    })
+    });
+    indicators();
   }
 
   const handleSalaryType = (event, newSelect) => {
