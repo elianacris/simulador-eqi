@@ -97,7 +97,7 @@ function App() {
   }
 
   return (
-    <ThemeProvider theme={theme}>
+    <ThemeProvider theme={theme} >
 
       <Container
         maxWidth={"lg"}
@@ -117,6 +117,7 @@ function App() {
         </Typography>
 
         <Box
+          data-testid="form"
           onSubmit={handleSubmit(onSubmit)}
           autoComplete='off'
           component='form'
@@ -298,6 +299,7 @@ function App() {
 
 
             <InputCurrencyRHF
+              data-testid="required-input"
               name='initialContribution'
               label='Aporte Inicial'
               control={control}

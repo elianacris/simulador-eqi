@@ -1,7 +1,7 @@
 import { createTheme } from '@mui/material/styles'
 export let theme = createTheme({
     typography: {
-        //fontFamily: 'Helvetica'
+        fontFamily: 'Helvica, sans-serif'
     },
     components: {
         MuiToggleButton: {
