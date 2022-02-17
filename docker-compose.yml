@@ -1,0 +1,20 @@
+version: '3'
+
+services:
+  backend:
+    build:
+      context: ./desafio-fake-api
+      dockerfile: ./Dockerfile
+    image: "backend"
+    ports:
+      - "3000:3000"
+
+  frontend:
+    build:
+      context: ./simulador-eqi
+      dockerfile: ./Dockerfile
+    image: "frontend"
+    ports:
+      - "3001:3001"
+    depends_on:
+      - backend

@@ -1,5 +1,4 @@
-# Simulador de Investimentos 
-
+# Simulador de Investimento
 ### Objetivo
 Desenvolver um website semelhante a um simulador de investimento, utilizando o [Wireframe](https://github.com/eqi-investimentos/desafio-frontend) e a [API-Fake](https://github.com/eqi-investimentos/desafio-fake-api)
 ### Projeto Construído com  
@@ -15,14 +14,20 @@ Desenvolver um website semelhante a um simulador de investimento, utilizando o [
 - [Docker](https://www.docker.com/)
 ## Começando
 
-As instruções a seguir irão lhe proporcionar uma cópia deste projeto e de como rodar em um container Docker para propósito de desenvolvimento e testes. Veja na sessão de [deployment](#Deployment) para saber com mais detalhes de como dar deploy em sua aplicação.
+As instruções a seguir irão lhe proporcionar uma cópia deste projeto e de como rodar em sua máquina local para propósito de desenvolvimento e testes. Veja na sessão de [deployment](#Deployment) para saber com mais detalhes de como dar deploy em sua aplicação.
 
 ### Pre-requisitos
-Para executar este container, você precisará do docker instalado.
+Dependências necessárias para se instalar o software e como instalá-las.
 
-* [Windows](https://docs.docker.com/windows/started)
-* [OS X](https://docs.docker.com/mac/started/)
-* [Linux](https://docs.docker.com/linux/started/)
+1. Tenha certeza que você tenha o node instalado em sua máquina (https://nodejs.org/)
+
+```
+node -v
+```
+2. E também o gerenciador de pacotes NPM (https://www.npmjs.com/)
+```
+npm -v
+```
 
 ### Instalação
 
@@ -36,16 +41,22 @@ https://github.com/elianacris/simulador-eqi
 2. Entre na pasta
 
 ```
-cd Simulador-de-Investimentos-EQI
+cd simulador-eqi
 ```
 
-3. Executar o comando para criar os containers
+3. Instale as dependências
 
 ```
-docker-compose up
+npm install
 ```
 
-4. Acesse no seu navegador o link de execução
+4. Em seguida rode a aplicação
+
+```
+npm start
+```
+
+5. Acesse no seu navegador o link de execução
 
 ```
 http://localhost:3001
